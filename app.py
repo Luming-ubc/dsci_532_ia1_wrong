@@ -39,7 +39,7 @@ app.layout = html.Div([
     dcc.RangeSlider(min=0, max=5, value=[1, 3], marks={0: '0', 5: '5'}),
 
     # Color text box
-    html.P('Hi, I am orange', id='my-para',
+    html.P('Loading this dataset might take a while ...', id='my-para',
            style={'background-color': 'orange'}),
 
     # break
