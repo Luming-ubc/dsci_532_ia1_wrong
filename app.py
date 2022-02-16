@@ -3,16 +3,20 @@ from dash import Input, Output
 from dash import Dash, html, dcc
 import altair as alt
 from vega_datasets import data
+import os
+import pandas as pd
 
-cars = data.cars()
+alt.data_transformers.enable('data_server')
+
+df = pd.read_csv('athlete_events.csv')
 
 # slider plot
 
 
-def plot_altair(xmax, df=cars.copy()):
-    chart = alt.Chart(df[df['Horsepower'] < xmax]).mark_point().encode(
-        x='Horsepower',
-        y='Weight_in_lbs')
+def plot_altair(xmax):
+    chart = alt.Chart(df[df['Age'] < xmax]).mark_point(opacity=0.5).encode(
+        x='Age',
+        y='Height')
     return chart.to_html()
 
 
@@ -79,18 +83,18 @@ app.layout = html.Div([
     html.Br(),
 
     # add altair plot - slider
-    'Hi, I select range of Horsepower for the plot below:',
-    dcc.Slider(id='xslider', min=0, value=120, max=240),  # slider
+    'Hi, please select range of age:',
+    dcc.Slider(id='xslider', min=0, value=30, max=80),  # slider
     html.Iframe(id='scatter',
-                srcDoc=plot_altair(xmax=240),
+                srcDoc=plot_altair(xmax=80),
                 style={'border-width': '0', 'width': '100%', 'height': '400px'}),  # fix size
 
 
     # add altair plot - dropdown
-    'Hi, I select category for x axis in the plot below:',
+    'Hi, please select y label:',
     dcc.Dropdown(
-        id='xcol-widget', value='Horsepower',
-        options=[{'label': i, 'value': i} for i in cars.columns]),
+        id='ycol-widget', value='Sex',
+        options=[{'label': i, 'value': i} for i in df.select_dtypes(include=['object']).columns]),
     html.Iframe(
         id='scatter_drop',
         style={'border-width': '0', 'width': '100%', 'height': '400px'}),
@@ -127,12 +131,13 @@ def update_output(xmax):
 
 @ app.callback(
     Output('scatter_drop', 'srcDoc'),
-    Input('xcol-widget', 'value'))
-def plot_altair_drop(xcol):
-    chart = alt.Chart(cars).mark_point().encode(
-        x=xcol,
-        y='Displacement',
-        tooltip='Horsepower').interactive()
+    Input('ycol-widget', 'value'))
+def plot_altair_drop(ycol):
+    chart = alt.Chart(df).mark_bar().encode(
+        x='count()',
+        y=alt.Y(ycol, sort='-x'),
+        color=ycol,
+        tooltip='Sex').interactive()
     return chart.to_html()
 
 
