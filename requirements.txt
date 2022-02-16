@@ -1,0 +1,8 @@
+vega_datasets
+altair
+dash==2.0
+dash_bootstrap_components
+pandas
+gunicorn
+ipython>=7.15
+altair_saver
